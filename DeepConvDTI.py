@@ -1,6 +1,3 @@
-
-
-
 # import numpy and pandas
 import numpy as np
 import pandas as pd
@@ -67,7 +64,6 @@ def parse_data(dti_dir, drug_dir, protein_dir, with_label=True,
     else:
         return {"protein_feature": protein_feature, "drug_feature": drug_feature}
 
-# In[13]:
 
 class Drug_Target_Prediction(object):
     
