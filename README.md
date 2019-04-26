@@ -222,5 +222,6 @@ In test mode, it will contain prediction results for given DTI pairs.
 
 ## Contact 
 hjnam@gist.ac.kr
+
 dlsrnsladlek@gist.ac.kr
 
