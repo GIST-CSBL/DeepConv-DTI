@@ -70,7 +70,7 @@ class Drug_Target_Prediction(object):
     def PLayer(self, size, filters, activation, initializer, regularizer_param):
         def f(input):
             # model_p = Convolution1D(filters=filters, kernel_size=size, padding='valid', activity_regularizer=l2(regularizer_param), kernel_initializer=initializer, kernel_regularizer=l2(regularizer_param))(input)
-            model_p = Convolution1D(filters=filters, kernel_size=size, padding='valid', kernel_initializer=initializer, kernel_regularizer=l2(regularizer_param))(input)
+            model_p = Convolution1D(filters=filters, kernel_size=size, padding='same', kernel_initializer=initializer, kernel_regularizer=l2(regularizer_param))(input)
             model_p = BatchNormalization()(model_p)
             model_p = Activation(activation)(model_p)
             return GlobalMaxPooling1D()(model_p)
@@ -266,7 +266,7 @@ if __name__ == '__main__':
     parser.add_argument("--test-dti-dir", "-i", help="Test dti [drug, target, [label]]", nargs="*")
     parser.add_argument("--test-drug-dir", "-d", help="Test drug information [drug, SMILES,[feature_name, ..]]", nargs="*")
     parser.add_argument("--test-protein-dir", '-t', help="Test Protein information [protein, seq, [feature_name]]", nargs="*")
-    parser.add_argument("--with-label", "-W", help="Existence of label information in test DTI")
+    parser.add_argument("--with-label", "-W", help="Existence of label information in test DTI", action="store_true")
     # structure_params
     parser.add_argument("--window-sizes", '-w', help="Window sizes for model (only works for Convolution)", default=None, nargs="*", type=int)
     parser.add_argument("--protein-layers","-p", help="Dense layers for protein", default=None, nargs="*", type=int)
