@@ -58,8 +58,6 @@ for dataset in test_names:
        AUPR = auc(recall,precision)
        print("\tArea Under ROC Curve(AUC): %0.3f" % AUC)
        print("\tArea Under PR Curve(AUPR): %0.3f" % AUPR)
-       print("\tOptimal threshold(AUC)   : %0.3f " % opt_t_AUC)
-       print("\tOptimal threshold(AUPR)  : %0.3f" % opt_t_AUPR)
        print("=================================================")
        result_dic.update({"AUC":AUC, "AUPR":AUPR}) 
     evaluation_df[dataset] = pd.Series(result_dic)
