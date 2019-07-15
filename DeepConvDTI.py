@@ -28,10 +28,10 @@ def encodeSeq(seq, seq_dic):
         return [seq_dic[aa] for aa in seq]
 
 def parse_data(dti_dir, drug_dir, protein_dir, with_label=True,
-               prot_len=2500, prot_vec="Convolution",
-               drug_vec="morgan_fp", drug_len=2048):
+               prot_len=2500, prot_vec="Convolution", protein_encoder=None,
+               drug_vec="Convolution", drug_len=2048):
 
-    print "Parsing {0} , {1}, {2} with length {3}, type {4}".format(*[dti_dir ,drug_dir, protein_dir, prot_len, prot_vec])
+    print("Parsing {0} , {1}, {2} with length {3}, type {4}".format(*[dti_dir ,drug_dir, protein_dir, prot_len, prot_vec]))
 
     protein_col = "Protein_ID"
     drug_col = "Compound_ID"
@@ -39,27 +39,24 @@ def parse_data(dti_dir, drug_dir, protein_dir, with_label=True,
     if with_label:
         label_col = "Label"
         col_names += [label_col]
-    dti_df = pd.read_csv(dti_dir)#,names=col_names)
-
+    dti_df = pd.read_csv(dti_dir)
     drug_df = pd.read_csv(drug_dir, index_col="Compound_ID")
     protein_df = pd.read_csv(protein_dir, index_col="Protein_ID")
 
-    drug_dic= drug_df[drug_vec].map(lambda fp: fp.split("\t")).to_dict()
-    drug_feature = np.array(list(dti_df[drug_col].map(lambda drug: drug_dic[drug])), dtype=np.float64)
 
-    if prot_vec != "Convolution":
-        prot_dic= protein_df[prot_vec].map(lambda seq: [float(i) for i in seq.split("\t")]).to_dict()
-        protein_feature = np.array(list(dti_df[protein_col].map(lambda protein: prot_dic[protein])), dtype=np.float64)
-
+    if prot_vec == "Convolution":
+        protein_df["encoded_sequence"] = protein_df.Sequence.map(protein_encoder.encode)
+    dti_df = pd.merge(dti_df, protein_df, left_on=protein_col, right_index=True)
+    dti_df = pd.merge(dti_df, drug_df, left_on=drug_col, right_index=True)
+    drug_feature = np.stack(dti_df[drug_vec].map(lambda fp: fp.split("\t")))
+    if prot_vec=="Convolution":
+        protein_feature = dti_df["encoded_sequence"].tolist()
     else:
-        protein_df["seq_num_vec"] = protein_df.Sequence.map(lambda seq: encodeSeq(seq, seq_dic))
-        prot_dic = protein_df.seq_num_vec.to_dict()
-        protein_feature = sequence.pad_sequences(dti_df[protein_col].map(lambda seq:prot_dic[seq]), maxlen=prot_len)
-
+        protein_feature = np.stack(dti_df[prot_vec].map(lambda fp: fp.split("\t")))
     if with_label:
-        label =  dti_df[label_col].values
-        print "\tPositive data : %d" %(sum(dti_df[label_col]))
-        print "\tNegative data : %d" %(dti_df.shape[0] - sum(dti_df[label_col]))
+        label = dti_df[label_col].values
+        print("\tPositive data : %d" %(sum(dti_df[label_col])))
+        print("\tNegative data : %d" %(dti_df.shape[0] - sum(dti_df[label_col])))
         return {"protein_feature": protein_feature, "drug_feature": drug_feature, "label": label}
     else:
         return {"protein_feature": protein_feature, "drug_feature": drug_feature}
@@ -186,7 +183,7 @@ class Drug_Target_Prediction(object):
             history = self.__model_t.fit([drug_feature,protein_feature],label,
                                          epochs=_+1, batch_size=batch_size, shuffle=True, verbose=1, initial_epoch=_)
             for dataset in kwargs:
-                print "\tPredction of " + dataset
+                print("\tPredction of " + dataset)
                 test_p = kwargs[dataset]["protein_feature"]
                 test_d = kwargs[dataset]["drug_feature"]
                 test_label = kwargs[dataset]["label"]
@@ -202,11 +199,11 @@ class Drug_Target_Prediction(object):
                 opt_t_AUC = thresholds_AUC[np.argmin(distance)]
                 opt_t_AUPR = thresholds[np.argmin(np.abs(EERs-ratio))]
                 AUPR = auc(recall,precision)
-                print "\tArea Under ROC Curve(AUC): %0.3f" % AUC
-                print "\tArea Under PR Curve(AUPR): %0.3f" % AUPR
-                print "\tOptimal threshold(AUC)   : %0.3f " % opt_t_AUC
-                print "\tOptimal threshold(AUPR)  : %0.3f" % opt_t_AUPR
-                print "================================================="
+                print("\tArea Under ROC Curve(AUC): %0.3f" % AUC)
+                print("\tArea Under PR Curve(AUPR): %0.3f" % AUPR)
+                print("\tOptimal threshold(AUC)   : %0.3f " % opt_t_AUC)
+                print("\tOptimal threshold(AUPR)  : %0.3f" % opt_t_AUPR)
+                print("=================================================")
                 result_dic[dataset]["AUC"].append(AUC)
                 result_dic[dataset]["AUPR"].append(AUPR)
                 result_dic[dataset]["opt_threshold(AUC)"].append(opt_t_AUC)
@@ -217,8 +214,8 @@ class Drug_Target_Prediction(object):
                 result_df[dataset, "AUPR"] = result_dic[dataset]["AUPR"]
                 result_df[dataset, "opt_threshold(AUC)"] = result_dic[dataset]["opt_threshold(AUC)"]
                 result_df[dataset, "opt_threshold(AUPR)"] = result_dic[dataset]["opt_threshold(AUPR)"]
-            print "save to " + output_file
-            print result_df
+            print("save to " + output_file)
+            print(result_df)
             result_df.to_csv(output_file, index=False)
 
     def predict(self, **kwargs):
@@ -341,14 +338,14 @@ if __name__ == '__main__':
     }
 
     model_params.update(type_params)
-    print "\tmodel parameters summary\t"
-    print "====================================================="
+    print("\tmodel parameters summary\t")
+    print("=====================================================")
     for key in model_params.keys():
-        print "{:20s} : {:10s}".format(key, str(model_params[key]))
-    print "====================================================="
+        print("{:20s} : {:10s}".format(key, str(model_params[key])))
+    print("=====================================================")
 
     dti_prediction_model = Drug_Target_Prediction(**model_params)
-    print dti_prediction_model.summary()
+    dti_prediction_model.summary()
 
     # read and parse training and test data
     train_dic.update(type_params)
@@ -361,17 +358,17 @@ if __name__ == '__main__':
         validation_params = {}
         validation_params.update(train_params)
         validation_params["output_file"] = output_file
-        print "\tvalidation summary\t"
-        print "====================================================="
+        print("\tvalidation summary\t")
+        print("=====================================================")
         for key in validation_params.keys():
-            print "{:20s} : {:10s}".format(key, str(validation_params[key]))
-        print "====================================================="
+            print("{:20s} : {:10s}".format(key, str(validation_params[key])))
+        print("=====================================================")
         validation_params.update(train_dic)
         validation_params.update(test_dic)
         dti_prediction_model.validation(**validation_params)
     # prediction mode
     elif args.predict:
-        print "prediction"
+        print("prediction")
         train_dic.update(train_params)
         dti_prediction_model.fit(**train_dic)
         test_predicted = dti_prediction_model.predict(**test_dic)
@@ -381,14 +378,14 @@ if __name__ == '__main__':
             temp_df = pd.DataFrame()
             value = test_predicted[dataset]["predicted"]
             value = np.squeeze(value)
-            print dataset+str(value.shape)
+            print(dataset+str(value.shape))
             temp_df[dataset,'predicted'] = value
             temp_df[dataset, 'label'] = np.squeeze(test_predicted[dataset]['label'])
             result_df = pd.concat([result_df, temp_df], ignore_index=True, axis=1)
             result_columns.append((dataset, "predicted"))
             result_columns.append((dataset, "label"))
         result_df.columns = pd.MultiIndex.from_tuples(result_columns)
-        print "save to %s"%output_file
+        print("save to %s"%output_file)
         result_df.to_csv(output_file, index=False)
 
     # save trained model

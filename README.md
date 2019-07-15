@@ -7,7 +7,8 @@ This Python script is used to train, validate, test deep learning model for pred
 ## Requirement
 ```
 tensorflow > 1.0
-keras > 2.0 numpy
+keras > 2.0 
+numpy
 pandas 
 scikit-learn  
 ```
@@ -35,7 +36,7 @@ scikit-learn
 
 ## Data Specification
 
-All training, validation, test should follow specification to be parsed correctly by DeepConvDTI
+All training, validation, test should follow specification to be parsed correctly by DeepConv-DTI
 
   * Model takes 3 types data as a set, Drug-target interaction data, target protein data, compound data.
 
@@ -49,7 +50,7 @@ After three data are correctly listed, target protein data and compound data wil
 
 Drug target interaction data should be at least 2 columns `Protein_ID` and `Compound_ID`,
 
-and should have `Label` column except `--test` case. `Label` colmun has to label `0` as negative and `1` as positive.
+and should have `Label` column except `--test` case. `Label` colmun has to have label `0` as negative and `1` as positive.
 
 |  Protein_ID  |  Compound_ID  |  Label  |
 | -------------|---------------|---------|
@@ -63,9 +64,9 @@ Because DeepConvDTI focuses on convolution on protein sequence, protein data spe
 
 If `Sequence` column is specified in data and `--prot-vec` is `Convolution`, it will execute convolution on protein.
 
-Or if you specify other type of column with `--prot-vec`(i.e. `Prot2Vec`), it will construct dense network
+Or if you specify other type of column with `--prot-vec`(i.e. `Prot2Vec`), it will construct dense (fully connected) network
 
-`Protein_ID` column will be used as forein key from `Protein_ID` from Drug-target interaction data.
+`Protein_ID` column will be used as foreign key from `Protein_ID` from Drug-target interaction data.
 
 |  Protein_ID  |  Sequence      |  Prot2Vec                  |
 |--------------|----------------|----------------------------|
@@ -75,7 +76,7 @@ Or if you specify other type of column with `--prot-vec`(i.e. `Prot2Vec`), it wi
 
 Basically same with Target protein data, but no `Convolution`.
 
-`Compoun_ID` column will be used as forein key from `Compoun_ID` from Drug-target interaction data.
+`Compound_ID` column will be used as forein key from `Compound_ID` from Drug-target interaction data.
 
 |  Compound_ID  |  morgan_r2        |
 |---------------|-------------------|
@@ -94,7 +95,7 @@ Basically same with Target protein data, but no `Convolution`.
                           [feature_name]]
 ```
 
-For training model, you should input 3 files, DTI informatin file, drug information file and target protein information file, as their format is specified above.
+For training model, you should input 3 files, DTI information file, drug information file and target protein information file, as their format is specified above.
 
 DTI information file for training should have `Label` column for training.
 
@@ -110,7 +111,7 @@ DTI information file for training should have `Label` column for training.
 
 DeepConvDTI script has two mode, validation and predict mode.
 
-In validation mode, peformances (AUC, AUPR, threshold for AUC and AUPR) on each step and selected hyperparameters are recorded.
+In validation mode, performances (AUC, AUPR, threshold for AUC and AUPR) on each step and selected hyperparameters are recorded.
 
 In test step, prediction results for given test dataset will be reported after training.
 
@@ -130,7 +131,7 @@ In test step, prediction results for given test dataset will be reported after t
 ```
 You can input multiple datasets for validation or test with argument specifier.
 
-In addition to DTI informatin file, drug information file and target protein information file, you need to name of validation or test datasets.
+In addition to DTI information file, drug information file and target protein information file, you need to name of validation or test datasets.
 
 For test dataset, you can inform that test dataset has label or not with `-W` value
 
