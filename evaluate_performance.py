@@ -1,5 +1,6 @@
 import pandas as pd
 import argparse
+import os
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_recall_curve, auc, roc_curve
 
@@ -23,9 +24,6 @@ if extension=='csv':
 elif extension=='tsv':
    result_df = pd.read_table(prediction_dir, header=[0,1])
 
-#result_df.columns = pd.MultiIndex.from_tuples(result_columns)
-
-import os
 th = args.threshold
 def label_by_th(y_pred, threshold=0.5):
     y_pred_copy = y_pred.copy()
@@ -41,36 +39,36 @@ else:
 #print result_df.head()
 for dataset in test_names:
     tn, fp, fn, tp = confusion_matrix(result_df[dataset,"label"].dropna(), label_by_th(result_df[dataset,"predicted"].dropna(), th)).ravel()
-    print "Evaluation of the %s set " % dataset
+    print("Evaluation of the %s set " % dataset)
     sen = float(tp)/(fn+tp)
     pre = float(tp)/(tp+fp)
     spe = float(tn)/(tn+fp)
     acc = float(tn+tp)/(tn+fp+fn+tp)
     f1 = (2*sen*pre)/(sen+pre)
-    print "\tSen : ", sen 
-    print "\tSpe : ", spe 
-    print "\tAcc : ", acc 
-    print "\tPrecision : ", pre 
-    print "\tF1 : ", f1
-    result_dic = {"Acc": acc, "Sen" : sen, "Pre":pre, "Acc":acc, "F1":f1, "Spe":spe}
+    print( "\tSen : ", sen )
+    print("\tSpe : ", spe )
+    print("\tAcc : ", acc )
+    print("\tPrecision : ", pre)
+    print("\tF1 : ", f1)
+    result_dic = {"Acc": acc, "Sen" : sen, "Pre":pre, "F1":f1, "Spe":spe}
     if no_th:
        fpr, tpr, thresholds_AUC = roc_curve(result_df[dataset,"label"], result_df[dataset,"predicted"])
        AUC = auc(fpr, tpr)
        precision, recall, thresholds = precision_recall_curve(result_df[dataset,"label"],result_df[dataset,"predicted"])
        AUPR = auc(recall,precision)
-       print "\tArea Under ROC Curve(AUC): %0.3f" % AUC
-       print "\tArea Under PR Curve(AUPR): %0.3f" % AUPR
-       #print "\tOptimal threshold(AUC)   : %0.3f " % opt_t_AUC
-       #print "\tOptimal threshold(AUPR)  : %0.3f" % opt_t_AUPR
-       print "================================================="
+       print("\tArea Under ROC Curve(AUC): %0.3f" % AUC)
+       print("\tArea Under PR Curve(AUPR): %0.3f" % AUPR)
+       print("\tOptimal threshold(AUC)   : %0.3f " % opt_t_AUC)
+       print("\tOptimal threshold(AUPR)  : %0.3f" % opt_t_AUPR)
+       print("=================================================")
        result_dic.update({"AUC":AUC, "AUPR":AUPR}) 
     evaluation_df[dataset] = pd.Series(result_dic)
 evaluation_output =  args.evaluation_output
 if evaluation_output:
-   print "save to %s"%output_file
+   print("save to %s"%output_file)
    dir_name, file_name = os.path.split(evaluation_output)
    if not os.path.isdir(dir_name):
       os.system("mkdir -p "+dir_name)
-      print "No directory named %s : create directory" % dir_name
+      print("No directory named %s : create directory" % dir_name)
    evaluation_df.to_csv(evaluation_output)
 
