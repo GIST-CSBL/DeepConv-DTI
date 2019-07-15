@@ -50,7 +50,7 @@ def parse_data(dti_dir, drug_dir, protein_dir, with_label=True,
     dti_df = pd.merge(dti_df, drug_df, left_on=drug_col, right_index=True)
     drug_feature = np.stack(dti_df[drug_vec].map(lambda fp: fp.split("\t")))
     if prot_vec=="Convolution":
-        protein_feature = dti_df["encoded_sequence"].tolist()
+        protein_feature = sequence.pad_sequences(dti_df["encoded_sequence"].values, prot_len)
     else:
         protein_feature = np.stack(dti_df[prot_vec].map(lambda fp: fp.split("\t")))
     if with_label:
@@ -172,7 +172,7 @@ class Drug_Target_Prediction(object):
         self.__model_t.summary()
     
     def validation(self, drug_feature, protein_feature, label, output_file=None, n_epoch=10, batch_size=32, **kwargs):
-        
+
         if output_file:
             param_tuple = pd.MultiIndex.from_tuples([("parameter", param) for param in ["window_sizes", "drug_layers", "fc_layers", "learning_rate"]])
             result_df = pd.DataFrame(data = [[self.__protein_strides, self.__drugs_layer, self.__fc_layers, self.__learning_rate]]*n_epoch, columns=param_tuple)
