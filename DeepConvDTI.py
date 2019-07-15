@@ -45,7 +45,7 @@ def parse_data(dti_dir, drug_dir, protein_dir, with_label=True,
 
 
     if prot_vec == "Convolution":
-        protein_df["encoded_sequence"] = protein_df.Sequence.map(encodeSeq)
+        protein_df["encoded_sequence"] = protein_df.Sequence.map(lambda a: encodeSeq(a, seq_dic))
     dti_df = pd.merge(dti_df, protein_df, left_on=protein_col, right_index=True)
     dti_df = pd.merge(dti_df, drug_df, left_on=drug_col, right_index=True)
     drug_feature = np.stack(dti_df[drug_vec].map(lambda fp: fp.split("\t")))
