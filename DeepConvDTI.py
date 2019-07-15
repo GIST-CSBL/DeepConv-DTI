@@ -28,7 +28,7 @@ def encodeSeq(seq, seq_dic):
         return [seq_dic[aa] for aa in seq]
 
 def parse_data(dti_dir, drug_dir, protein_dir, with_label=True,
-               prot_len=2500, prot_vec="Convolution", protein_encoder=None,
+               prot_len=2500, prot_vec="Convolution",
                drug_vec="Convolution", drug_len=2048):
 
     print("Parsing {0} , {1}, {2} with length {3}, type {4}".format(*[dti_dir ,drug_dir, protein_dir, prot_len, prot_vec]))
@@ -45,7 +45,7 @@ def parse_data(dti_dir, drug_dir, protein_dir, with_label=True,
 
 
     if prot_vec == "Convolution":
-        protein_df["encoded_sequence"] = protein_df.Sequence.map(protein_encoder.encode)
+        protein_df["encoded_sequence"] = protein_df.Sequence.map(encodeSeq)
     dti_df = pd.merge(dti_df, protein_df, left_on=protein_col, right_index=True)
     dti_df = pd.merge(dti_df, drug_df, left_on=drug_col, right_index=True)
     drug_feature = np.stack(dti_df[drug_vec].map(lambda fp: fp.split("\t")))
