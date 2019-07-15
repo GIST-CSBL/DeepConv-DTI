@@ -164,7 +164,7 @@ class Drug_Target_Prediction(object):
         K.get_session().run(tf.global_variables_initializer())
 
     def fit(self, drug_feature, protein_feature, label, n_epoch=10, batch_size=32):
-        for _ in xrange(n_epoch):
+        for _ in range(n_epoch):
             history = self.__model_t.fit([drug_feature,protein_feature],label, epochs=_+1, batch_size=batch_size, shuffle=True, verbose=1,initial_epoch=_)
         return self.__model_t
     
@@ -178,8 +178,8 @@ class Drug_Target_Prediction(object):
             result_df = pd.DataFrame(data = [[self.__protein_strides, self.__drugs_layer, self.__fc_layers, self.__learning_rate]]*n_epoch, columns=param_tuple)
             result_df["epoch"] = range(1,n_epoch+1)
         result_dic = {dataset: {"AUC":[], "AUPR": [], "opt_threshold(AUPR)":[], "opt_threshold(AUC)":[] }for dataset in kwargs}
-        
-        for _ in xrange(n_epoch):
+
+        for _ in range(n_epoch):
             history = self.__model_t.fit([drug_feature,protein_feature],label,
                                          epochs=_+1, batch_size=batch_size, shuffle=True, verbose=1, initial_epoch=_)
             for dataset in kwargs:
