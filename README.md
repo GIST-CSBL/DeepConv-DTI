@@ -221,6 +221,42 @@ In validation mode, it will contain results for every epoch
 
 In test mode, it will contain prediction results for given DTI pairs.
 
+## Toy Examples
+
+### Training and validation of model
+
+For line example, if you have training dataset, `toy_examples/training_dataset/training_dti.csv`, `toy_examples/training_dataset/training_compound.csv` and `toy_examples/training_dataset/training_protein.csv` with right specification.
+You can validate model with validation dataset, `toy_examples/validation_dataset/validation_dti.csv`, `toy_examples/validation_dataset/validation_compound.csv` and `toy_examples/validation_dataset/validation_protein.csv` by using this command line.
+
+`python DeepConvDTI.py ./toy_examples/training_dataset/training_dti.csv ./toy_examples/training_dataset/training_compound.csv ./toy_examples/training_dataset/training_protein.csv --validation -n validation_dataset -i ./toy_examples/validation_dataset/validation_dti.csv -d ./toy_examples/validation_dataset/validation_compound.csv -t ./toy_examples/validation_dataset/validation_protein.csv -W -c 512 128 -w 10 15 20 25 30 -p 128 -f 128 -r 0.0001 -n 30 -v Convolution -l 2500 -V morgan_fp_r2 -L 2048 -D 0 -a elu -F 128 -b 32 -y 0.0001 -o ./validation_output.csv -m ./model.model -e 1`
+
+This command will train model with given hyper-parameters for 1 epoch. (because of -e 1).
+And resulting in validation result `./validation_output.csv`, and corresponding model `./model.model`
+
+### Prediction by using model
+
+There are two ways to predict DTIs with command line
+When you have `toy_examples/test_dataset/test_dti.csv`, `toy_examples/test_dataset/test_compound.csv` and `toy_examples/test_dataset/test_protein.csv`
+
+`python DeepConvDTI.py ./toy_examples/training_dataset/training_dti.csv ./toy_examples/training_dataset/training_compound.csv ./toy_examples/training_dataset/training_protein.csv --predict -n predict -i ./toy_examples/test_dataset/test_dti.csv -d ./toy_examples/test_dataset/test_compound.csv -t ./toy_examples/test_dataset/test_protein.csv -c 512 128 -w 10 15 20 25 30 -p 128 -f 128 -r 0.0001 -n 30 -v Convolution -l 2500 -V morgan_fp_r2 -L 2048 -D 0 -a elu -F 128 -b 32 -y 0.0001 -o ./test_output.csv -m ./model.model -e 15 -W`
+
+With this command, model will be trained with training dataset for 15 epochs and predict test dataset when it finished training, resulting in `test_output.csv` which have prediction score and its true label (because of -W)
+The second way of prediction is using predict_with_model.py. If you have model which is saved from validation or something, you can use it.
+
+`python predict_with_model.py ./model.model -n predict -i ./toy_examples/test_dataset/test_dti.csv -d ./toy_examples/test_dataset/test_compound.csv -t ./toy_examples/test_dataset/test_protein.csv -v Convolution -l 2500 -V morgan_fp_r2 -L 2048 -W -o test_result.csv`
+
+this code will result in same result file with first command.
+
+### evaluation of performance of model
+
+In addition, you can evaluate the performances of prediction results with label by using `evaluate_performance.py.`
+When you have an optimal threshold from validation and the names of the test dataset.
+
+`python evaluate_performance.py test_result.csv -n predict -T 0.2`
+
+This command will report performances.
+
+
 ## License
 
 DeepConv-DTI follow [GPL 3.0v license](LICENSE). Therefore, DeepConv-DTI is open source and free to use for everyone.

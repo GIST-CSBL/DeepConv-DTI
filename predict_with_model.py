@@ -53,9 +53,11 @@ def parse_data(dti_dir, drug_dir, protein_dir, with_label=True,
         label = dti_df[label_col].values
         print("\tPositive data : %d" %(sum(dti_df[label_col])))
         print("\tNegative data : %d" %(dti_df.shape[0] - sum(dti_df[label_col])))
-        return {"protein_feature": protein_feature, "drug_feature": drug_feature, "label": label}
+        return {"protein_feature": protein_feature, "drug_feature": drug_feature, "label": label,
+                "Compound_ID":dti_df["Compound_ID"].tolist(), "Protein_ID":dti_df["Protein_ID"].tolist()}
     else:
-        return {"protein_feature": protein_feature, "drug_feature": drug_feature}
+        return {"protein_feature": protein_feature, "drug_feature": drug_feature,
+                "Compound_ID":dti_df["Compound_ID"].tolist(), "Protein_ID":dti_df["Protein_ID"].tolist()}
 
 
 
@@ -115,12 +117,15 @@ if __name__=="__main__":
         d_splitted = np.array_split(prediction_dic["drug_feature"], N)
         p_splitted = np.array_split(prediction_dic["protein_feature"], N)
         predicted = sum([np.squeeze(loaded_model.predict([d,p])).tolist() for d,p in zip(d_splitted, p_splitted)], [])
-        temp_df[dataset,'predicted'] = predicted
-   
+        temp_df[dataset, 'predicted'] = predicted
+        temp_df[dataset, 'Compound_ID'] = prediction_dic["Compound_ID"]
+        temp_df[dataset, 'Protein_ID'] = prediction_dic["Protein_ID"]
         if with_label:
            temp_df[dataset, 'label'] = np.squeeze(test_dic[dataset]['label'])
         result_df = pd.concat([result_df, temp_df], ignore_index=True, axis=1)
         result_columns.append((dataset, "predicted"))
+        result_columns.append((dataset, "Compound_ID"))
+        result_columns.append((dataset, "Protein_ID"))
         if with_label:
            result_columns.append((dataset, "label"))
     result_df.columns = pd.MultiIndex.from_tuples(result_columns)
