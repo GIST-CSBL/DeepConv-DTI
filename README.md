@@ -6,7 +6,7 @@ This Python script is used to train, validate, test deep learning model for pred
 
 ## Requirement
 ```
-tensorflow > 1.0
+tensorflow > 1.0 and < 2.0
 keras > 2.0 
 numpy
 pandas 
