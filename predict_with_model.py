@@ -113,7 +113,7 @@ if __name__=="__main__":
     for dataset in test_dic:
         temp_df = pd.DataFrame()
         prediction_dic = test_dic[dataset]
-        N = int(prediction_dic["drug_feature"].shape[0]/50)
+        N = int(np.ceil(prediction_dic["drug_feature"].shape[0]/50))
         d_splitted = np.array_split(prediction_dic["drug_feature"], N)
         p_splitted = np.array_split(prediction_dic["protein_feature"], N)
         predicted = sum([np.squeeze(loaded_model.predict([d,p])).tolist() for d,p in zip(d_splitted, p_splitted)], [])
