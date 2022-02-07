@@ -271,18 +271,18 @@ if __name__ == '__main__':
     parser.add_argument("--fc-layers", '-f', help="Dense layers for concatenated layers of drug and target layer", default=[256], nargs="*", type=int)
     # training_params
     parser.add_argument("--learning-rate", '-r', help="Learning late for training", default=1e-4, type=float)
-    parser.add_argument("--n-epoch", '-e', help="The number of epochs for training or validation", type=int, default=10)
+    parser.add_argument("--n-epoch", '-e', help="The number of epochs for training or validation", type=int, default=15)
     # type_params
     parser.add_argument("--prot-vec", "-v", help="Type of protein feature, if Convolution, it will execute conlvolution on sequeunce", type=str, default="Convolution")
     parser.add_argument("--prot-len", "-l", help="Protein vector length", default=2500, type=int)
     parser.add_argument("--drug-vec", "-V", help="Type of drug feature", type=str, default="morgan_fp_r2")
     parser.add_argument("--drug-len", "-L", help="Drug vector length", default=2048, type=int)
     # the other hyper-parameters
-    parser.add_argument("--activation", "-a", help='Activation function of model', type=str)
+    parser.add_argument("--activation", "-a", help='Activation function of model', type=str, default='elu')
     parser.add_argument("--dropout", "-D", help="Dropout ratio", default=0.2, type=float)
     parser.add_argument("--n-filters", "-F", help="Number of filters for convolution layer, only works for Convolution", default=64, type=int)
     parser.add_argument("--batch-size", "-b", help="Batch size", default=32, type=int)
-    parser.add_argument("--decay", "-y", help="Learning rate decay", default=0.0, type=float)
+    parser.add_argument("--decay", "-y", help="Learning rate decay", default=1e-4, type=float)
     # mode_params
     parser.add_argument("--validation", help="Excute validation with independent data, will give AUC and AUPR (No prediction result)", action="store_true", default=True)
     parser.add_argument("--predict", help="Predict interactions of independent test set", action="store_true")
