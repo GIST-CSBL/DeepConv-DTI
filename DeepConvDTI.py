@@ -137,12 +137,12 @@ class Drug_Target_Prediction(object):
 
         return model_f
 
-    def __init__(self, dropout=0.2, drug_layers=(1024,512), protein_strides = (10,15,20,25), filters=64,
+    def __init__(self, dropout=0.2, drug_layers=(1024,512), protein_windows = (10,15,20,25), filters=64,
                  learning_rate=1e-3, decay=0.0, fc_layers=None, prot_vec=None, prot_len=2500, activation="relu",
                  drug_len=2048, drug_vec="ECFP4", protein_layers=None):
         self.__dropout = dropout
         self.__drugs_layer = drug_layers
-        self.__protein_strides = protein_strides
+        self.__protein_strides = protein_windows
         self.__filters = filters
         self.__fc_layers = fc_layers
         self.__learning_rate = learning_rate
@@ -265,17 +265,17 @@ if __name__ == '__main__':
     parser.add_argument("--test-protein-dir", '-t', help="Test Protein information [protein, seq, [feature_name]]", nargs="*")
     parser.add_argument("--with-label", "-W", help="Existence of label information in test DTI", action="store_true")
     # structure_params
-    parser.add_argument("--window-sizes", '-w', help="Window sizes for model (only works for Convolution)", default=None, nargs="*", type=int)
-    parser.add_argument("--protein-layers","-p", help="Dense layers for protein", default=None, nargs="*", type=int)
-    parser.add_argument("--drug-layers", '-c', help="Dense layers for drugs", default=None, nargs="*", type=int)
-    parser.add_argument("--fc-layers", '-f', help="Dense layers for concatenated layers of drug and target layer", default=None, nargs="*", type=int)
+    parser.add_argument("--window-sizes", '-w', help="Window sizes for model (only works for Convolution)", default=[10, 15, 20, 25, 30], nargs="*", type=int)
+    parser.add_argument("--protein-layers","-p", help="Dense layers for protein", default=[128, 64], nargs="*", type=int)
+    parser.add_argument("--drug-layers", '-c', help="Dense layers for drugs", default=[128], nargs="*", type=int)
+    parser.add_argument("--fc-layers", '-f', help="Dense layers for concatenated layers of drug and target layer", default=[256], nargs="*", type=int)
     # training_params
     parser.add_argument("--learning-rate", '-r', help="Learning late for training", default=1e-4, type=float)
     parser.add_argument("--n-epoch", '-e', help="The number of epochs for training or validation", type=int, default=10)
     # type_params
     parser.add_argument("--prot-vec", "-v", help="Type of protein feature, if Convolution, it will execute conlvolution on sequeunce", type=str, default="Convolution")
     parser.add_argument("--prot-len", "-l", help="Protein vector length", default=2500, type=int)
-    parser.add_argument("--drug-vec", "-V", help="Type of drug feature", type=str, default="morgan_fp")
+    parser.add_argument("--drug-vec", "-V", help="Type of drug feature", type=str, default="morgan_fp_r2")
     parser.add_argument("--drug-len", "-L", help="Drug vector length", default=2048, type=int)
     # the other hyper-parameters
     parser.add_argument("--activation", "-a", help='Activation function of model', type=str)
@@ -284,7 +284,7 @@ if __name__ == '__main__':
     parser.add_argument("--batch-size", "-b", help="Batch size", default=32, type=int)
     parser.add_argument("--decay", "-y", help="Learning rate decay", default=0.0, type=float)
     # mode_params
-    parser.add_argument("--validation", help="Excute validation with independent data, will give AUC and AUPR (No prediction result)", action="store_true")
+    parser.add_argument("--validation", help="Excute validation with independent data, will give AUC and AUPR (No prediction result)", action="store_true", default=True)
     parser.add_argument("--predict", help="Predict interactions of independent test set", action="store_true")
     # output_params
     parser.add_argument("--save-model", "-m", help="save model", type=str)
@@ -303,7 +303,10 @@ if __name__ == '__main__':
     tests = args.test_dti_dir
     test_proteins = args.test_protein_dir
     test_drugs = args.test_drug_dir
-    test_sets = zip(test_names, tests, test_drugs, test_proteins)
+    if test_names is None:
+        test_sets = []
+    else:
+        test_sets = zip(test_names, tests, test_drugs, test_proteins)
     output_file = args.output
     # model_structure variables
     drug_layers = args.drug_layers
@@ -327,7 +330,7 @@ if __name__ == '__main__':
     # model parameter
     model_params = {
         "drug_layers": drug_layers,
-        "protein_strides": window_sizes,
+        "protein_windows": window_sizes,
         "protein_layers": protein_layers,
         "fc_layers": fc_layers,
         "learning_rate": args.learning_rate,
