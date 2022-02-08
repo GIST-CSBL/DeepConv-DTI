@@ -15,7 +15,7 @@ scikit-learn
 
 ## Usage 
 ```
-  usage: DTI_deep.py [-h] [--test-name [TEST_NAME [TEST_NAME ...]]]
+  usage: DeepConvDTI.py [-h] [--test-name [TEST_NAME [TEST_NAME ...]]]
                      [--test-dti-dir [TEST_DTI_DIR [TEST_DTI_DIR ...]]]
                      [--test-drug-dir [TEST_DRUG_DIR [TEST_DRUG_DIR ...]]]
                      [--test-protein-dir [TEST_PROTEIN_DIR [TEST_PROTEIN_DIR ...]]]
