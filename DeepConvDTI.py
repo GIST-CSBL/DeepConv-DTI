@@ -284,8 +284,8 @@ if __name__ == '__main__':
     parser.add_argument("--batch-size", "-b", help="Batch size", default=32, type=int)
     parser.add_argument("--decay", "-y", help="Learning rate decay", default=1e-4, type=float)
     # mode_params
-    parser.add_argument("--validation", help="Excute validation with independent data, will give AUC and AUPR (No prediction result)", action="store_true", default=True)
-    parser.add_argument("--predict", help="Predict interactions of independent test set", action="store_true")
+    parser.add_argument("--validation", help="Excute validation with independent data, will give AUC and AUPR (No prediction result)", action="store_true", default=False)
+    parser.add_argument("--predict", help="Predict interactions of independent test set", action="store_true", default=False)
     # output_params
     parser.add_argument("--save-model", "-m", help="save model", type=str)
     parser.add_argument("--output", "-o", help="Prediction output", type=str)
@@ -356,21 +356,8 @@ if __name__ == '__main__':
     test_dic = {test_name: parse_data(test_dti, test_drug, test_protein, with_label=True, **type_params)
                 for test_name, test_dti, test_drug, test_protein in test_sets}
 
-    # validation mode
-    if args.validation:
-        validation_params = {}
-        validation_params.update(train_params)
-        validation_params["output_file"] = output_file
-        print("\tvalidation summary\t")
-        print("=====================================================")
-        for key in validation_params.keys():
-            print("{:20s} : {:10s}".format(key, str(validation_params[key])))
-        print("=====================================================")
-        validation_params.update(train_dic)
-        validation_params.update(test_dic)
-        dti_prediction_model.validation(**validation_params)
     # prediction mode
-    elif args.predict:
+    if args.predict:
         print("prediction")
         train_dic.update(train_params)
         dti_prediction_model.fit(**train_dic)
@@ -390,6 +377,19 @@ if __name__ == '__main__':
         result_df.columns = pd.MultiIndex.from_tuples(result_columns)
         print("save to %s"%output_file)
         result_df.to_csv(output_file, index=False)
+    # validation mode
+    if args.validation:
+        validation_params = {}
+        validation_params.update(train_params)
+        validation_params["output_file"] = output_file
+        print("\tvalidation summary\t")
+        print("=====================================================")
+        for key in validation_params.keys():
+            print("{:20s} : {:10s}".format(key, str(validation_params[key])))
+        print("=====================================================")
+        validation_params.update(train_dic)
+        validation_params.update(test_dic)
+        dti_prediction_model.validation(**validation_params)
 
     # save trained model
     if args.save_model:
